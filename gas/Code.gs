@@ -33,6 +33,12 @@ const LINE_GROUP_ID = 'C5a5b36e27a78ed6cfbb74839a8a9d04e';
 function doPost(e) {
   try {
     // リクエストボディを解析
+    if (!e || !e.postData || !e.postData.contents) {
+      Logger.log('Error: postData is undefined');
+      Logger.log('Event object:', JSON.stringify(e));
+      return createErrorResponse('リクエストデータが不正です');
+    }
+
     const requestData = JSON.parse(e.postData.contents);
     const action = requestData.action;
 
@@ -343,7 +349,10 @@ function createSuccessResponse(data) {
   };
 
   return ContentService.createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON);
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
 /**
@@ -358,5 +367,8 @@ function createErrorResponse(message) {
   };
 
   return ContentService.createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON);
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader('Access-Control-Allow-Origin', '*')
+    .setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
