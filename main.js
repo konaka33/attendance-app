@@ -50,6 +50,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
+ * グローバルエラーハンドラ
+ */
+window.addEventListener('error', (event) => {
+    console.error('グローバルエラー:', event.error);
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('未処理のPromise rejection:', event.reason);
+});
+
+/**
  * 初期化処理
  */
 function initApp() {
@@ -252,18 +263,26 @@ async function sendToGAS(data) {
 async function handleClockIn() {
     try {
         console.log('出勤ボタンがクリックされました');
+        console.log('現在のtodayRecord:', todayRecord);
 
         // バリデーション（二重打刻防止）
         if (todayRecord.clockIn && !todayRecord.clockOut) {
+            console.log('二重打刻防止: 既に出勤済み');
             showToast(ERROR_MESSAGES.AlreadyClockedIn, 'error');
             return;
         }
 
+        console.log('バリデーション通過');
+
         // ローディング表示
         showLoading();
+        console.log('ローディング表示完了');
 
         const timestamp = getCurrentTimestamp();
+        console.log('タイムスタンプ取得:', timestamp);
+
         const time = timestamp.split(' ')[1]; // HH:mm部分
+        console.log('時刻抽出:', time);
 
         console.log('GASに送信開始:', {
             action: 'clock_in',
