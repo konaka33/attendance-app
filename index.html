@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="出退勤打刻アプリ - ワンタップで打刻、LINE通知">
+
+    <title>出退勤打刻アプリ</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <header>
+            <h1>🕐 出退勤打刻アプリ</h1>
+            <div class="user-info">
+                <span class="user-name" id="user-name">konaka33</span>
+                <span class="user-id">(user01)</span>
+            </div>
+        </header>
+
+        <!-- 現在時刻表示 -->
+        <section class="current-time-section">
+            <div class="current-time" id="current-time">
+                <span class="time-label">現在時刻</span>
+                <span class="time-value" id="time-value">--:--:--</span>
+                <span class="date-value" id="date-value">----/--/--</span>
+            </div>
+        </section>
+
+        <!-- 打刻ボタン -->
+        <section class="action-section">
+            <button id="clock-in-btn" class="action-btn clock-in-btn">
+                <span class="btn-icon">☀️</span>
+                <span class="btn-text">出勤</span>
+            </button>
+
+            <button id="clock-out-btn" class="action-btn clock-out-btn">
+                <span class="btn-icon">🌙</span>
+                <span class="btn-text">退勤</span>
+            </button>
+        </section>
+
+        <!-- 本日の記録 -->
+        <section class="record-section">
+            <h2>📊 本日の記録</h2>
+            <div class="record-card">
+                <div class="record-item">
+                    <span class="record-label">出勤</span>
+                    <span class="record-value" id="clock-in-time">--:--</span>
+                </div>
+                <div class="record-item">
+                    <span class="record-label">退勤</span>
+                    <span class="record-value" id="clock-out-time">--:--</span>
+                </div>
+                <div class="record-item highlight">
+                    <span class="record-label">勤務時間</span>
+                    <span class="record-value" id="working-hours">--</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 課題完了報告 -->
+        <section class="complete-section">
+            <button id="complete-btn" class="complete-btn">
+                🎉 課題完了報告
+            </button>
+        </section>
+
+        <!-- フッター -->
+        <footer>
+            <p>&copy; 2025 konaka33 - Attendance App</p>
+        </footer>
+    </div>
+
+    <!-- メッセージトースト -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ローディングオーバーレイ -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p class="loading-text">送信中...</p>
+    </div>
+
+    <!-- Service Worker 登録 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.log('Service Worker registration failed', err));
+        }
+    </script>
+
+    <!-- メインスクリプト -->
+    <script src="main.js"></script>
+</body>
+</html>
