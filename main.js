@@ -251,6 +251,8 @@ async function sendToGAS(data) {
  */
 async function handleClockIn() {
     try {
+        console.log('出勤ボタンがクリックされました');
+
         // バリデーション（二重打刻防止）
         if (todayRecord.clockIn && !todayRecord.clockOut) {
             showToast(ERROR_MESSAGES.AlreadyClockedIn, 'error');
@@ -263,6 +265,13 @@ async function handleClockIn() {
         const timestamp = getCurrentTimestamp();
         const time = timestamp.split(' ')[1]; // HH:mm部分
 
+        console.log('GASに送信開始:', {
+            action: 'clock_in',
+            userId: CONFIG.USER_ID,
+            name: CONFIG.USER_NAME,
+            timestamp: timestamp
+        });
+
         // GASに送信
         const result = await sendToGAS({
             action: 'clock_in',
@@ -270,6 +279,8 @@ async function handleClockIn() {
             name: CONFIG.USER_NAME,
             timestamp: timestamp
         });
+
+        console.log('GASからのレスポンス:', result);
 
         // ローカルデータ更新
         todayRecord = {
@@ -294,6 +305,11 @@ async function handleClockIn() {
 
     } catch (error) {
         console.error('出勤打刻エラー:', error);
+        console.error('エラー詳細:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
         const message = ERROR_MESSAGES[error.message] || ERROR_MESSAGES.Unknown;
         showToast(`❌ ${message}`, 'error');
     } finally {
