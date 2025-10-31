@@ -77,15 +77,66 @@ function doPost(e) {
 }
 
 /**
- * GET リクエスト処理（テスト用）
+ * GET リクエスト処理
+ * URLパラメータからデータを受け取り処理する（CORS回避のため）
  */
 function doGet(e) {
-  return ContentService.createTextOutput(
-    JSON.stringify({
-      status: 'success',
-      message: 'Google Apps Script は正常に動作しています'
-    })
-  ).setMimeType(ContentService.MimeType.JSON);
+  try {
+    // dataパラメータが存在する場合は通常の処理を実行
+    if (e.parameter && e.parameter.data) {
+      const requestData = JSON.parse(e.parameter.data);
+      const action = requestData.action;
+
+      Logger.log(`Action: ${action}`);
+      Logger.log(`Request:`, requestData);
+
+      let result;
+
+      switch (action) {
+        case 'clock_in':
+          result = handleClockIn(requestData);
+          break;
+
+        case 'clock_out':
+          result = handleClockOut(requestData);
+          break;
+
+        case 'get_today':
+          result = handleGetToday(requestData);
+          break;
+
+        case 'complete_task':
+          result = handleCompleteTask(requestData);
+          break;
+
+        default:
+          return createErrorResponse('不明なアクションです');
+      }
+
+      return createSuccessResponse(result);
+    }
+
+    // dataパラメータがない場合はテストレスポンスを返す
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        status: 'success',
+        message: 'Google Apps Script は正常に動作しています'
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    Logger.log('エラー: ' + error.toString());
+    return createErrorResponse('サーバーエラー: ' + error.toString());
+  }
+}
+
+/**
+ * OPTIONS リクエスト処理（CORS プリフライト対応）
+ * ブラウザがPOSTリクエストを送る前に送信するプリフライトリクエストに対応
+ */
+function doOptions(e) {
+  return ContentService.createTextOutput('')
+    .setMimeType(ContentService.MimeType.TEXT);
 }
 
 // ========================================
@@ -349,10 +400,7 @@ function createSuccessResponse(data) {
   };
 
   return ContentService.createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**
@@ -367,8 +415,5 @@ function createErrorResponse(message) {
   };
 
   return ContentService.createTextOutput(JSON.stringify(response))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader('Access-Control-Allow-Origin', '*')
-    .setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-    .setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    .setMimeType(ContentService.MimeType.JSON);
 }

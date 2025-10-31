@@ -220,7 +220,7 @@ async function fetchWithRetry(url, options, retries = CONFIG.RETRY_COUNT) {
 }
 
 /**
- * GAS APIにPOSTリクエスト送信
+ * GAS APIにGETリクエスト送信（CORS回避のため）
  * @async
  * @param {Object} data - 送信データ
  * @returns {Promise<Object>} レスポンスJSON
@@ -235,12 +235,14 @@ async function sendToGAS(data) {
         throw new Error('NetworkError');
     }
 
-    const response = await fetchWithRetry(CONFIG.GAS_WEB_APP_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
+    // CORSプリフライトを避けるため、URLパラメータとしてデータを送信
+    const params = new URLSearchParams();
+    params.append('data', JSON.stringify(data));
+
+    const url = `${CONFIG.GAS_WEB_APP_URL}?${params.toString()}`;
+
+    const response = await fetchWithRetry(url, {
+        method: 'GET'
     });
 
     const result = await response.json();
