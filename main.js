@@ -3,7 +3,7 @@
 // ========================================
 
 const CONFIG = {
-    GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxUuGJnGPeBYBHt2FcQfBjemCfoWewge-zZ1rZazFU7yENiYE6SMZXWEVNDxWp1o6zm/exec',
+    GAS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzryFOP0wTyIJgtSdM5hUZngBCaKBLhyMp3fPJN40Dn3FF64_9AXQ255xMEde-AhIPt/exec',
     USER_ID: 'user01',
     USER_NAME: 'konaka33',
     APP_URL: 'https://konaka33.github.io/attendance-app',
