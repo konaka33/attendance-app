@@ -195,7 +195,22 @@ function handleClockOut(data) {
     throw new Error('出勤記録が見つかりません');
   }
 
-  const clockIn = today.clockIn;
+  // clockInが空の場合はエラー
+  if (!today.clockIn) {
+    throw new Error('出勤時刻が記録されていません');
+  }
+
+  // clockInを文字列に変換（Date型の場合に対応）
+  let clockIn = today.clockIn;
+
+  // Date型の場合は HH:mm 形式に変換
+  if (clockIn instanceof Date) {
+    clockIn = Utilities.formatDate(clockIn, Session.getScriptTimeZone(), 'HH:mm');
+  } else {
+    clockIn = String(clockIn);
+  }
+
+  Logger.log(`clockIn (変換後): ${clockIn}, 型: ${typeof clockIn}`);
 
   // 勤務時間計算
   const workingHours = calculateWorkingHours(clockIn, time);
@@ -233,11 +248,27 @@ function handleGetToday(data) {
   const today = getTodayRecord(sheet, userId, date);
 
   if (today) {
+    // 時刻をフォーマット（Date型の場合に対応）
+    let clockIn = today.clockIn;
+    let clockOut = today.clockOut;
+
+    if (clockIn instanceof Date) {
+      clockIn = Utilities.formatDate(clockIn, Session.getScriptTimeZone(), 'HH:mm');
+    } else if (clockIn) {
+      clockIn = String(clockIn);
+    }
+
+    if (clockOut instanceof Date) {
+      clockOut = Utilities.formatDate(clockOut, Session.getScriptTimeZone(), 'HH:mm');
+    } else if (clockOut) {
+      clockOut = String(clockOut);
+    }
+
     return {
       date: date,
-      clockIn: today.clockIn,
-      clockOut: today.clockOut,
-      workingHours: today.workingHours
+      clockIn: clockIn || null,
+      clockOut: clockOut || null,
+      workingHours: today.workingHours || null
     };
   } else {
     return {
@@ -317,8 +348,22 @@ function getOrCreateSheet(sheetName) {
 function getTodayRecord(sheet, userId, date) {
   const data = sheet.getDataRange().getValues();
 
+  Logger.log('getTodayRecord - 検索条件:');
+  Logger.log(`  userId: ${userId}, date: ${date}`);
+  Logger.log('スプレッドシートのデータ:');
+
   for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === date && data[i][1] === userId) {
+    Logger.log(`  行${i}: date="${data[i][0]}", userId="${data[i][1]}"`);
+
+    // 日付の型を確認して文字列に変換
+    const sheetDate = data[i][0] instanceof Date
+      ? Utilities.formatDate(data[i][0], Session.getScriptTimeZone(), 'yyyy/MM/dd')
+      : String(data[i][0]);
+
+    Logger.log(`  変換後の日付: "${sheetDate}"`);
+
+    if (sheetDate === date && data[i][1] === userId) {
+      Logger.log('  -> マッチしました！');
       return {
         row: i + 1,
         date: data[i][0],
@@ -331,6 +376,7 @@ function getTodayRecord(sheet, userId, date) {
     }
   }
 
+  Logger.log('  -> マッチする記録が見つかりませんでした');
   return null;
 }
 
